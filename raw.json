@@ -1,0 +1,121 @@
+{
+  "kimono_app_categories": {
+    "kimono_tailoring": {
+      "display_name": "Kimono (Tailoring)",
+      "description": "Categorized by seasonal construction and fabric weight.",
+      "subcategories": {
+        "awase": "Awase (Lined / Oct-May)",
+        "hitoe": "Hitoe (Unlined / Jun & Sep)",
+        "usumono": "Usumono (Sheer Summer / Jul-Aug)",
+        "yukata": "Yukata (Casual Cotton Summer)"
+      }
+    },
+    "kimono_formality": {
+      "display_name": "Kimono (Formality Type)",
+      "description": "Categorized by dress code and pattern layout.",
+      "subcategories": {
+        "kurotomesode_irotomesode": "Kurotomesode / Irotomesode (Highly Formal)",
+        "furisode": "Furisode (Formal Long-Sleeve)",
+        "homongi_tsukesage": "Homongi / Tsukesage (Semi-Formal)",
+        "iromuji": "Iromuji (Semi-Formal Solid)",
+        "komon": "Komon (Casual All-Over Pattern)",
+        "tsumugi": "Tsumugi (Casual Slub Silk)"
+      }
+    },
+    "obi": {
+      "display_name": "Obi (Sashes)",
+      "description": "Categorized by length, width, and formality.",
+      "subcategories": {
+        "maru_obi": "Maru Obi (Ultra-Formal Double-Width)",
+        "fukuro_obi": "Fukuro Obi (Formal)",
+        "nagoya_obi": "Nagoya Obi (Pre-Folded Casual/Semi-Formal)",
+        "hanhaba_obi": "Hanhaba Obi (Casual Half-Width)",
+        "kyobukuro_obi": "Kyobukuro Obi (Casual Flat Short)",
+        "kaku_obi": "Kaku Obi (Men's Stiff Sash)",
+        "heko_obi": "Heko Obi (Soft Gathered Sash)",
+        "tsukuri_obi": "Tsukuri Obi (Pre-Tied / Two-Piece)"
+      }
+    },
+    "obiage": {
+      "display_name": "Obiage (Obi Scarves)",
+      "description": "Categorized by fabric weight and weave.",
+      "subcategories": {
+        "rinzu_shusu": "Rinzu / Shusu (Heavy Formal Silk)",
+        "chirimen": "Chirimen (Matte Silk Crepe)",
+        "ro_obiage": "Ro Obiage (Sheer Summer Mesh)",
+        "agasage": "Agasage (Voluminous Shibori for Furisode)"
+      }
+    },
+    "obijime": {
+      "display_name": "Obijime (Obi Cords)",
+      "description": "Categorized by structural weave shape and season.",
+      "subcategories": {
+        "hirauchi": "Hirauchi (Flat Woven)",
+        "marugumi": "Marugumi (Round Woven)",
+        "kakugumi": "Kakugumi (Square Woven)",
+        "ro_natsu_obijime": "Ro / Natsu (Summer Mesh)",
+        "obidome_yo": "Obidome-yo (Ultra-Thin For Clips)"
+      }
+    },
+    "juban": {
+      "display_name": "Juban (Undergarments)",
+      "description": "Categorized by layering mechanics and pieces.",
+      "subcategories": {
+        "nagajuban": "Nagajuban (Full-Length Under-Kimono)",
+        "hadajuban": "Hadajuban (Skin-Layer Sweat Shirt)",
+        "susoyoke": "Susoyoke (Traditional Underskirt)",
+        "nibushiki_juban": "Nibushiki Juban (Two-Piece Under-Kimono)"
+      }
+    },
+    "haneri": {
+      "display_name": "Haneri (Collars)",
+      "description": "Categorized by decoration and seasonality.",
+      "subcategories": {
+        "shiro_haneri": "Shiro-haneri (Plain White Formal)",
+        "shiro_komon_shishuu": "Shiro-shishū (White-on-White Embroidered)",
+        "iromon_patterned": "Iromon (Colored / Printed Casual)",
+        "ro_haneri": "Ro Haneri (Sheer Summer Mesh)"
+      }
+    },
+    "shoes": {
+      "display_name": "Shoes & Footwear",
+      "description": "Categorized by traditional sole construction and modern additions.",
+      "subcategories": {
+        "zori": "Zori (Formal/Casual Sandals)",
+        "geta": "Geta (Wooden Summer Sandals)",
+        "okobo_pokkuri": "Okobo / Pokkuri (Tall Platform Blocks)",
+        "modern_footwear": "Modern (Boots, Lace-ups, Heels)",
+        "tabi_socks": "Tabi (Split-Toe Socks)"
+      }
+    },
+    "outerwear": {
+      "display_name": "Haori & Outerwear",
+      "description": "Categorized by collar style, enclosure, and season.",
+      "subcategories": {
+        "haori": "Haori (Open-Front Jacket)",
+        "michiyuki": "Michiyuki (Square-Neck Enclosed Coat)",
+        "michiannai_dochuugi": "Dochuugi (Wrap-Front Side-Tie Coat)",
+        "natsu_haori": "Natsu Haori (Sheer / Lace Summer Jacket)"
+      }
+    },
+    "hakama": {
+      "display_name": "Hakama (Pleated Trousers)",
+      "description": "Categorized by internal leg division.",
+      "subcategories": {
+        "umanori": "Umanori Hakama (Divided Legs)",
+        "andon": "Andon Hakama (Lantern Skirt)",
+        "female_graduation": "Female / Graduation Hakama (High-Waisted)"
+      }
+    },
+    "accessory_misc": {
+      "display_name": "Accessory / Misc",
+      "description": "Functional dressing helpers and styling items.",
+      "subcategories": {
+        "hair_pieces": "Hair Pieces (Kanzashi, Combs, Florals)",
+        "bags": "Bags (Clutches, Kinchaku Pouches, Baskets)",
+        "kitsuke_tools": "Kitsuke Tools (Cords, Boards, Pillows)",
+        "sensu_fans": "Sensu (Decorative Folding Fans)"
+      }
+    }
+  }
+}
