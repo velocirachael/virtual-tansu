@@ -1,4 +1,4 @@
-# APP-Kimono
+# virtual-tansu
 Building a gui to help Florida Kimono Club members organize their closet and plan outfits. 
 
 For kimono collectors with growing collections, this app replaces tedious spreadsheets with a visual, purpose-built kimono closet management system that makes it easy to organize, browse, and rediscover what they own without physically handling garments.
