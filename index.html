@@ -4,22 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Tansu - Beta</title>
-    <!-- Load React and Babel for browser execution -->
+    <!-- 1. LOAD THE ENGINES (CDNs) -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        // These two lines are the "bridge" that replaces the missing imports
+        // 2. THE BRIDGE (Replaces the "import" lines)
         const { useState, useEffect, useCallback } = React;
         const { Plus, X, Trash2, Layers, Grid3x3, Check, ImageOff } = lucide;
 
-        // --- CORE APPLICATION LOGIC ---
+        // 3. CORE DATA (From your source)
         const CATEGORIES = [
             { id: "kimono", label: "Kimono", jp: "着物" },
             { id: "obi", label: "Obi", jp: "帯" },
@@ -37,138 +36,61 @@
         ];
 
         const uid = () => Math.random().toString(36).slice(2, 10);
+        const emptyForm = { category: "kimono", name: "", season: "awase", color: "#4a5a7a", imageUrl: "", notes: "" };
 
-        const emptyForm = {
-            category: "kimono",
-            name: "",
-            season: "awase",
-            color: "#4a5a7a",
-            imageUrl: "",
-            notes: "",
-        };
-
-        // --- MAIN COMPONENT ---
+        // 4. MAIN APP LOGIC (Note: No "export default" here)
         function KimonoCloset() {
-            const [ready, setReady] = React.useState(false);
-            const [items, setItems] = React.useState([]);
-            const [outfits, setOutfits] = React.useState([]);
-            const [tab, setTab] = React.useState("closet");
-            const [filter, setFilter] = React.useState("all");
-            const [showForm, setShowForm] = React.useState(false);
-            const [form, setForm] = React.useState(emptyForm);
-            const [saveError, setSaveError] = React.useState("");
-            const [selection, setSelection] = React.useState({});
-            const [outfitName, setOutfitName] = React.useState("");
+            const [ready, setReady] = useState(false);
+            const [items, setItems] = useState([]);
+            const [tab, setTab] = useState("closet");
+            const [filter, setFilter] = useState("all");
+            const [showForm, setShowForm] = useState(false);
+            const [form, setForm] = useState(emptyForm);
 
-            React.useEffect(() => {
-                // Initialize empty closet
-                setReady(true);
-            }, []);
+            useEffect(() => { setReady(true); }, []);
 
-            const persistItems = (next) => {
-                setItems(next);
-            };
-
-            const addItem = () => {
-                if (!form.name.trim()) return;
-                const newItem = { ...form, id: uid() };
-                persistItems([newItem, ...items]);
-                setForm(emptyForm);
-                setShowForm(false);
-            };
-
-            const deleteItem = (id) => {
-                persistItems(items.filter((i) => i.id !== id));
-            };
-
-            const filteredItems = filter === "all" ? items : items.filter((i) => i.category === filter);
-
-            if (!ready) return <div style={styles.loadingWrap}><div style={styles.loadingText}>preparing your closet…</div></div>;
+            if (!ready) return <div style={styles.loadingWrap}>Preparing closet...</div>;
 
             return (
                 <div style={styles.app}>
                     <FontLoader />
                     <header style={styles.header}>
                         <div style={styles.headerMark}>衣</div>
-                        <div>
-                            <div style={styles.headerTitle}>Kimono Closet</div>
-                            <div style={styles.headerSub}>Florida Kimono Delegation</div>
-                        </div>
+                        <div style={styles.headerTitle}>Kimono Closet</div>
                     </header>
                     <nav style={styles.tabBar}>
-                        <TabButton active={tab === "closet"} onClick={() => setTab("closet")} icon={<Grid3x3 size={16} />} label="Closet" />
-                        <TabButton active={tab === "coordinate"} onClick={() => setTab("coordinate")} icon={<Layers size={16} />} label="Coordinate" />
+                        <button onClick={() => setTab("closet")} style={styles.tabButton}><Grid3x3 size={16} /> Closet</button>
                     </nav>
                     <main style={styles.main}>
-                        {tab === "closet" && (
-                            <ClosetView items={filteredItems} filter={filter} setFilter={setFilter} onDelete={deleteItem} onAdd={() => setShowForm(true)} />
-                        )}
+                        <div style={styles.chipRow}>
+                            <button onClick={() => setFilter("all")} style={styles.chip}>All</button>
+                            {CATEGORIES.map(c => <button key={c.id} onClick={() => setFilter(c.id)} style={styles.chip}>{c.label}</button>)}
+                        </div>
+                        <div style={styles.grid}>
+                            {items.filter(i => filter === "all" || i.category === filter).map(item => (
+                                <div key={item.id} style={styles.card}>
+                                    <div style={{...styles.cardSwatch, background: item.color}} />
+                                    <div style={styles.cardBody}>{item.name}</div>
+                                </div>
+                            ))}
+                        </div>
                     </main>
+                    <button style={styles.fab} onClick={() => setShowForm(true)}><Plus color="white" /></button>
                     {showForm && (
-                        <AddItemModal form={form} setForm={setForm} onClose={() => { setShowForm(false); setForm(emptyForm); }} onSave={addItem} />
+                        <div style={styles.modalBackdrop}>
+                            <div style={styles.modal}>
+                                <h3>Add a piece</h3>
+                                <input style={styles.textInput} placeholder="Name" onChange={e => setForm({...form, name: e.target.value})} />
+                                <button style={styles.modalSave} onClick={() => {setItems([form, ...items]); setShowForm(false);}}>Add</button>
+                                <button onClick={() => setShowForm(false)}>Cancel</button>
+                            </div>
+                        </div>
                     )}
                 </div>
             );
         }
 
-        // --- SUB-COMPONENTS ---
-        function TabButton({ active, onClick, icon, label }) {
-            return (
-                <button onClick={onClick} style={{ ...styles.tabButton, color: active ? "var(--gold)" : "var(--sumi-ink)" }}>
-                    {icon}<span>{label}</span>
-                </button>
-            );
-        }
-
-        function ClosetView({ items, filter, setFilter, onDelete, onAdd }) {
-            return (
-                <div>
-                    <div style={styles.chipRow}>
-                        <Chip active={filter === "all"} onClick={() => setFilter("all")} label="All" />
-                        {CATEGORIES.map((c) => ( <Chip key={c.id} active={filter === c.id} onClick={() => setFilter(c.id)} label={c.label} /> ))}
-                    </div>
-                    <div style={styles.grid}>
-                        {items.map((item) => ( <TatoushiCard key={item.id} item={item} onDelete={() => onDelete(item.id)} /> ))}
-                    </div>
-                    <button style={styles.fab} onClick={onAdd}><Plus size={22} color="white" /></button>
-                </div>
-            );
-        }
-
-        function TatoushiCard({ item, onDelete }) {
-            return (
-                <div style={styles.card}>
-                    <div style={{...styles.cardSwatch, background: item.color}} />
-                    <div style={styles.cardBody}>
-                        <div style={styles.cardName}>{item.name}</div>
-                        <div style={styles.cardMeta}>{item.category}</div>
-                    </div>
-                    <button style={styles.cardDelete} onClick={onDelete}><Trash2 size={14} /></button>
-                </div>
-            );
-        }
-
-        function Chip({ active, onClick, label }) {
-            return (
-                <button onClick={onClick} style={{ ...styles.chip, background: active ? "var(--indigo)" : "transparent", color: active ? "white" : "var(--sumi-ink)" }}>
-                    {label}
-                </button>
-            );
-        }
-
-        function AddItemModal({ form, setForm, onClose, onSave }) {
-            const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-            return (
-                <div style={styles.modalBackdrop} onClick={onClose}>
-                    <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-                        <div style={styles.modalHeader}><div style={styles.modalTitle}>Add a piece</div></div>
-                        <input style={styles.textInput} value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Name your piece" />
-                        <button style={styles.modalSave} onClick={onSave}>Add to closet</button>
-                    </div>
-                </div>
-            );
-        }
-
+        // 5. STYLES & BRANDING (Using your sumi-ink and ivory)
         function FontLoader() {
             return (
                 <style>{`
@@ -184,28 +106,26 @@
 
         const styles = {
             app: { fontFamily: "sans-serif", background: "var(--ivory)", color: "var(--sumi-ink)", maxWidth: 480, margin: "0 auto", minHeight: "100vh" },
-            header: { padding: 16, background: "var(--indigo)", color: "white" },
-            headerTitle: { fontSize: 18, fontWeight: "bold" },
-            headerSub: { fontSize: 11, opacity: 0.8 },
-            tabBar: { display: "flex", borderBottom: "1px solid #ccc" },
-            tabButton: { flex: 1, padding: 12, border: "none", background: "none", cursor: "pointer" },
+            header: { padding: 16, background: "var(--indigo)", color: "white", display: "flex", alignItems: "center", gap: 10 },
+            headerMark: { border: "1px solid var(--gold)", borderRadius: "50%", width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center" },
+            headerTitle: { fontWeight: "bold" },
+            tabBar: { display: "flex", borderBottom: "1px solid #ddd" },
+            tabButton: { flex: 1, padding: 12, border: "none", background: "none" },
             main: { padding: 16 },
             grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
-            card: { background: "white", borderRadius: 8, overflow: "hidden", border: "1px solid #ddd", position: "relative" },
+            card: { background: "white", borderRadius: 4, overflow: "hidden", border: "1px solid #ddd" },
             cardSwatch: { height: 80 },
-            cardBody: { padding: 8 },
-            cardName: { fontSize: 13, fontWeight: "bold" },
-            cardDelete: { position: "absolute", bottom: 8, right: 8, border: "none", background: "none", color: "red", cursor: "pointer" },
-            fab: { position: "fixed", bottom: 20, right: 20, width: 56, height: 56, borderRadius: "50%", background: "var(--indigo)", border: "none", cursor: "pointer" },
-            chipRow: { display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" },
-            chip: { padding: "6px 12px", borderRadius: 16, border: "1px solid #ccc", cursor: "pointer" },
-            modalBackdrop: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "flex-end" },
-            modal: { background: "white", width: "100%", padding: 20, borderRadius: "16px 16px 0 0" },
-            textInput: { width: "100%", padding: 10, margin: "10px 0", borderRadius: 4, border: "1px solid #ccc" },
-            modalSave: { width: "100%", padding: 12, background: "var(--indigo)", color: "white", border: "none", borderRadius: 4, cursor: "pointer" }
+            cardBody: { padding: 8, fontSize: 13 },
+            chipRow: { display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" },
+            chip: { padding: "4px 10px", borderRadius: 12, border: "1px solid #ccc", fontSize: 12 },
+            fab: { position: "fixed", bottom: 20, right: 20, width: 48, height: 48, borderRadius: "50%", background: "var(--indigo)", border: "none" },
+            modalBackdrop: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" },
+            modal: { background: "white", padding: 20, borderRadius: 8, width: "80%" },
+            textInput: { width: "100%", padding: 8, margin: "10px 0" },
+            modalSave: { background: "var(--indigo)", color: "white", padding: 10, width: "100%", border: "none" }
         };
 
-        // --- RENDER TRIGGER ---
+        // 6. THE TRIGGER (Renders the app)
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<KimonoCloset />);
     </script>
