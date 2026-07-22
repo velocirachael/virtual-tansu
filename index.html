@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Tansu - Beta</title>
-    <!-- 1. LOAD THE ENGINES (CDNs) -->
+    <!-- Load the React and Lucide engines -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
+<body style="margin: 0; background-color: #F7F2E7;">
     <div id="root"></div>
 
     <script type="text/babel">
-        // 2. THE BRIDGE (Replaces the "import" lines)
+        // 1. Setup the environment (replaces the "import" lines)
         const { useState, useEffect, useCallback } = React;
         const { Plus, X, Trash2, Layers, Grid3x3, Check, ImageOff } = lucide;
 
-        // 3. CORE DATA (From your source)
+        // 2. Define the Tansu parameters
         const CATEGORIES = [
             { id: "kimono", label: "Kimono", jp: "着物" },
             { id: "obi", label: "Obi", jp: "帯" },
@@ -38,7 +38,7 @@
         const uid = () => Math.random().toString(36).slice(2, 10);
         const emptyForm = { category: "kimono", name: "", season: "awase", color: "#4a5a7a", imageUrl: "", notes: "" };
 
-        // 4. MAIN APP LOGIC (Note: No "export default" here)
+        // 3. The Main App Component
         function KimonoCloset() {
             const [ready, setReady] = useState(false);
             const [items, setItems] = useState([]);
@@ -47,30 +47,50 @@
             const [showForm, setShowForm] = useState(false);
             const [form, setForm] = useState(emptyForm);
 
-            useEffect(() => { setReady(true); }, []);
+            // Use standard browser storage (localStorage) instead of window.storage
+            useEffect(() => {
+                const saved = localStorage.getItem("tansu-closet");
+                if (saved) setItems(JSON.parse(saved));
+                setReady(true);
+            }, []);
 
-            if (!ready) return <div style={styles.loadingWrap}>Preparing closet...</div>;
+            const saveItems = (newItems) => {
+                setItems(newItems);
+                localStorage.setItem("tansu-closet", JSON.stringify(newItems));
+            };
+
+            if (!ready) return <div style={{padding: 40, textAlign: 'center', color: '#6B6255'}}>Preparing closet...</div>;
 
             return (
                 <div style={styles.app}>
-                    <FontLoader />
+                    <style>{`
+                        :root {
+                            --indigo: #16324A;
+                            --ivory: #F7F2E7;
+                            --sumi-ink: #2B2b2b;
+                            --gold: #B8935A;
+                        }
+                        body { background: var(--ivory); }
+                    `}</style>
                     <header style={styles.header}>
                         <div style={styles.headerMark}>衣</div>
-                        <div style={styles.headerTitle}>Kimono Closet</div>
+                        <div style={{color: 'white'}}>
+                            <div style={{fontWeight: 'bold'}}>Kimono Closet</div>
+                            <div style={{fontSize: '10px', opacity: 0.8}}>Florida Kimono Delegation</div>
+                        </div>
                     </header>
-                    <nav style={styles.tabBar}>
-                        <button onClick={() => setTab("closet")} style={styles.tabButton}><Grid3x3 size={16} /> Closet</button>
-                    </nav>
-                    <main style={styles.main}>
+                    <main style={{padding: 20}}>
                         <div style={styles.chipRow}>
                             <button onClick={() => setFilter("all")} style={styles.chip}>All</button>
-                            {CATEGORIES.map(c => <button key={c.id} onClick={() => setFilter(c.id)} style={styles.chip}>{c.label}</button>)}
+                            {CATEGORIES.map(c => (
+                                <button key={c.id} onClick={() => setFilter(c.id)} style={styles.chip}>{c.label}</button>
+                            ))}
                         </div>
                         <div style={styles.grid}>
                             {items.filter(i => filter === "all" || i.category === filter).map(item => (
                                 <div key={item.id} style={styles.card}>
-                                    <div style={{...styles.cardSwatch, background: item.color}} />
-                                    <div style={styles.cardBody}>{item.name}</div>
+                                    <div style={{height: 80, background: item.color}} />
+                                    <div style={{padding: 8, fontSize: 13}}>{item.name}</div>
                                 </div>
                             ))}
                         </div>
@@ -79,10 +99,10 @@
                     {showForm && (
                         <div style={styles.modalBackdrop}>
                             <div style={styles.modal}>
-                                <h3>Add a piece</h3>
-                                <input style={styles.textInput} placeholder="Name" onChange={e => setForm({...form, name: e.target.value})} />
-                                <button style={styles.modalSave} onClick={() => {setItems([form, ...items]); setShowForm(false);}}>Add</button>
-                                <button onClick={() => setShowForm(false)}>Cancel</button>
+                                <h3 style={{fontFamily: 'serif'}}>Add a piece</h3>
+                                <input style={styles.textInput} placeholder="Piece Name" onChange={e => setForm({...form, name: e.target.value})} />
+                                <button style={styles.modalSave} onClick={() => {saveItems([form, ...items]); setShowForm(false);}}>Add to Closet</button>
+                                <button style={{width: '100%', padding: 10, background: 'none', border: 'none'}} onClick={() => setShowForm(false)}>Cancel</button>
                             </div>
                         </div>
                     )}
@@ -90,42 +110,21 @@
             );
         }
 
-        // 5. STYLES & BRANDING (Using your sumi-ink and ivory)
-        function FontLoader() {
-            return (
-                <style>{`
-                    :root {
-                        --indigo: #16324A;
-                        --ivory: #F7F2E7;
-                        --sumi-ink: #2B2b2b;
-                        --gold: #B8935A;
-                    }
-                `}</style>
-            );
-        }
-
         const styles = {
-            app: { fontFamily: "sans-serif", background: "var(--ivory)", color: "var(--sumi-ink)", maxWidth: 480, margin: "0 auto", minHeight: "100vh" },
-            header: { padding: 16, background: "var(--indigo)", color: "white", display: "flex", alignItems: "center", gap: 10 },
-            headerMark: { border: "1px solid var(--gold)", borderRadius: "50%", width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center" },
-            headerTitle: { fontWeight: "bold" },
-            tabBar: { display: "flex", borderBottom: "1px solid #ddd" },
-            tabButton: { flex: 1, padding: 12, border: "none", background: "none" },
-            main: { padding: 16 },
-            grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
-            card: { background: "white", borderRadius: 4, overflow: "hidden", border: "1px solid #ddd" },
-            cardSwatch: { height: 80 },
-            cardBody: { padding: 8, fontSize: 13 },
-            chipRow: { display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" },
-            chip: { padding: "4px 10px", borderRadius: 12, border: "1px solid #ccc", fontSize: 12 },
-            fab: { position: "fixed", bottom: 20, right: 20, width: 48, height: 48, borderRadius: "50%", background: "var(--indigo)", border: "none" },
-            modalBackdrop: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" },
-            modal: { background: "white", padding: 20, borderRadius: 8, width: "80%" },
-            textInput: { width: "100%", padding: 8, margin: "10px 0" },
-            modalSave: { background: "var(--indigo)", color: "white", padding: 10, width: "100%", border: "none" }
+            app: { fontFamily: "sans-serif", background: "white", maxWidth: 480, margin: "0 auto", minHeight: "100vh", boxShadow: "0 0 20px rgba(0,0,0,0.1)" },
+            header: { padding: 20, background: "var(--indigo)", display: "flex", alignItems: "center", gap: 12 },
+            headerMark: { border: "1px solid var(--gold)", color: "var(--gold)", width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" },
+            chipRow: { display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" },
+            chip: { padding: "6px 12px", borderRadius: 20, border: "1px solid #ddd", background: "white", fontSize: 12 },
+            grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 15 },
+            card: { border: "1px solid #eee", borderRadius: 4, overflow: "hidden" },
+            fab: { position: "fixed", bottom: 30, right: 30, width: 56, height: 56, borderRadius: "50%", background: "var(--indigo)", border: "none", cursor: "pointer", boxShadow: "0 4px 10px rgba(0,0,0,0.3)" },
+            modalBackdrop: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 },
+            modal: { background: "white", padding: 25, borderRadius: 12, width: "85%", maxWidth: 350 },
+            textInput: { width: "100%", padding: 12, margin: "15px 0", boxSizing: "border-box", border: "1px solid #ccc", borderRadius: 4 },
+            modalSave: { width: "100%", padding: 12, background: "var(--indigo)", color: "white", border: "none", borderRadius: 4, fontWeight: "bold" }
         };
 
-        // 6. THE TRIGGER (Renders the app)
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<KimonoCloset />);
     </script>
