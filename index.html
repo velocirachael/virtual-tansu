@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Virtual Tansu - Beta</title>
-    <!-- Load the React and Lucide engines -->
+    <!-- 1. CDNs: Loading the React and Icon engines from the web -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -14,11 +14,11 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // 1. Setup the environment (replaces the "import" lines)
+        // 2. THE BRIDGE: Replaces your "import" lines for the browser
         const { useState, useEffect, useCallback } = React;
         const { Plus, X, Trash2, Layers, Grid3x3, Check, ImageOff } = lucide;
 
-        // 2. Define the Tansu parameters
+        // 3. YOUR DATA: Using categories and seasons from your source code [1, 2]
         const CATEGORIES = [
             { id: "kimono", label: "Kimono", jp: "着物" },
             { id: "obi", label: "Obi", jp: "帯" },
@@ -36,30 +36,33 @@
         ];
 
         const uid = () => Math.random().toString(36).slice(2, 10);
-        const emptyForm = { category: "kimono", name: "", season: "awase", color: "#4a5a7a", imageUrl: "", notes: "" };
 
-        // 3. The Main App Component
+        // 4. THE APP ENGINE
         function KimonoCloset() {
             const [ready, setReady] = useState(false);
             const [items, setItems] = useState([]);
             const [tab, setTab] = useState("closet");
             const [filter, setFilter] = useState("all");
             const [showForm, setShowForm] = useState(false);
-            const [form, setForm] = useState(emptyForm);
+            const [name, setName] = useState("");
 
-            // Use standard browser storage (localStorage) instead of window.storage
+            // PERSISTENCE FIX: Replaces the crashing window.storage with browser localStorage [3]
             useEffect(() => {
-                const saved = localStorage.getItem("tansu-closet");
+                const saved = localStorage.getItem("tansu_closet_data");
                 if (saved) setItems(JSON.parse(saved));
                 setReady(true);
             }, []);
 
-            const saveItems = (newItems) => {
+            const handleSave = () => {
+                if (!name.trim()) return;
+                const newItems = [{ id: uid(), name, category: "kimono", color: "#4a5a7a" }, ...items];
                 setItems(newItems);
-                localStorage.setItem("tansu-closet", JSON.stringify(newItems));
+                localStorage.setItem("tansu_closet_data", JSON.stringify(newItems));
+                setName("");
+                setShowForm(false);
             };
 
-            if (!ready) return <div style={{padding: 40, textAlign: 'center', color: '#6B6255'}}>Preparing closet...</div>;
+            if (!ready) return <div style={{padding: 50, textAlign: 'center', color: '#2B2b2b'}}>Opening Tansu...</div>;
 
             return (
                 <div style={styles.app}>
@@ -70,39 +73,47 @@
                             --sumi-ink: #2B2b2b;
                             --gold: #B8935A;
                         }
-                        body { background: var(--ivory); }
                     `}</style>
                     <header style={styles.header}>
                         <div style={styles.headerMark}>衣</div>
-                        <div style={{color: 'white'}}>
-                            <div style={{fontWeight: 'bold'}}>Kimono Closet</div>
-                            <div style={{fontSize: '10px', opacity: 0.8}}>Florida Kimono Delegation</div>
+                        <div>
+                            <div style={{fontWeight: 'bold', fontSize: '18px'}}>Virtual Tansu</div>
+                            <div style={{fontSize: '11px', opacity: 0.8}}>Florida Kimono Delegation</div>
                         </div>
                     </header>
-                    <main style={{padding: 20}}>
-                        <div style={styles.chipRow}>
+                    
+                    <nav style={styles.tabBar}>
+                        <button onClick={() => setTab("closet")} style={{...styles.tabBtn, borderBottom: tab === 'closet' ? '2px solid var(--gold)' : 'none'}}>Closet</button>
+                        <button onClick={() => setTab("coord")} style={{...styles.tabBtn, borderBottom: tab === 'coord' ? '2px solid var(--gold)' : 'none'}}>Coordinate</button>
+                    </nav>
+
+                    <main style={{padding: '20px'}}>
+                        <div style={{display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap'}}>
                             <button onClick={() => setFilter("all")} style={styles.chip}>All</button>
                             {CATEGORIES.map(c => (
                                 <button key={c.id} onClick={() => setFilter(c.id)} style={styles.chip}>{c.label}</button>
                             ))}
                         </div>
+
                         <div style={styles.grid}>
                             {items.filter(i => filter === "all" || i.category === filter).map(item => (
                                 <div key={item.id} style={styles.card}>
-                                    <div style={{height: 80, background: item.color}} />
-                                    <div style={{padding: 8, fontSize: 13}}>{item.name}</div>
+                                    <div style={{height: '80px', background: item.color}} />
+                                    <div style={{padding: '10px', fontSize: '13px', fontWeight: '500'}}>{item.name}</div>
                                 </div>
                             ))}
                         </div>
                     </main>
+
                     <button style={styles.fab} onClick={() => setShowForm(true)}><Plus color="white" /></button>
+
                     {showForm && (
-                        <div style={styles.modalBackdrop}>
+                        <div style={styles.modalOverlay}>
                             <div style={styles.modal}>
-                                <h3 style={{fontFamily: 'serif'}}>Add a piece</h3>
-                                <input style={styles.textInput} placeholder="Piece Name" onChange={e => setForm({...form, name: e.target.value})} />
-                                <button style={styles.modalSave} onClick={() => {saveItems([form, ...items]); setShowForm(false);}}>Add to Closet</button>
-                                <button style={{width: '100%', padding: 10, background: 'none', border: 'none'}} onClick={() => setShowForm(false)}>Cancel</button>
+                                <h2 style={{marginTop: 0, fontFamily: 'serif'}}>Add to Closet</h2>
+                                <input style={styles.input} placeholder="Piece name (e.g. Silk Obi)" value={name} onChange={e => setName(e.target.value)} />
+                                <button style={styles.saveBtn} onClick={handleSave}>Save Piece</button>
+                                <button style={styles.cancelBtn} onClick={() => setShowForm(false)}>Cancel</button>
                             </div>
                         </div>
                     )}
@@ -110,23 +121,26 @@
             );
         }
 
+        // 5. STYLES: Using your updated --sumi-ink and --ivory [4]
         const styles = {
-            app: { fontFamily: "sans-serif", background: "white", maxWidth: 480, margin: "0 auto", minHeight: "100vh", boxShadow: "0 0 20px rgba(0,0,0,0.1)" },
-            header: { padding: 20, background: "var(--indigo)", display: "flex", alignItems: "center", gap: 12 },
-            headerMark: { border: "1px solid var(--gold)", color: "var(--gold)", width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" },
-            chipRow: { display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" },
-            chip: { padding: "6px 12px", borderRadius: 20, border: "1px solid #ddd", background: "white", fontSize: 12 },
-            grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 15 },
-            card: { border: "1px solid #eee", borderRadius: 4, overflow: "hidden" },
-            fab: { position: "fixed", bottom: 30, right: 30, width: 56, height: 56, borderRadius: "50%", background: "var(--indigo)", border: "none", cursor: "pointer", boxShadow: "0 4px 10px rgba(0,0,0,0.3)" },
-            modalBackdrop: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 },
-            modal: { background: "white", padding: 25, borderRadius: 12, width: "85%", maxWidth: 350 },
-            textInput: { width: "100%", padding: 12, margin: "15px 0", boxSizing: "border-box", border: "1px solid #ccc", borderRadius: 4 },
-            modalSave: { width: "100%", padding: 12, background: "var(--indigo)", color: "white", border: "none", borderRadius: 4, fontWeight: "bold" }
+            app: { fontFamily: "sans-serif", background: "white", maxWidth: '480px', margin: '0 auto', minHeight: '100vh', position: 'relative', color: '#2B2b2b' },
+            header: { background: "#16324A", color: "white", padding: '20px', display: 'flex', alignItems: 'center', gap: '15px' },
+            headerMark: { border: '1px solid #B8935A', width: '35px', height: '35px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#B8935A', fontWeight: 'bold' },
+            tabBar: { display: 'flex', background: '#FBF8F2', borderBottom: '1px solid #E3DAC9' },
+            tabBtn: { flex: 1, padding: '15px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '500' },
+            grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' },
+            card: { background: '#F6F1E7', border: '1px solid #E3DAC9', borderRadius: '4px', overflow: 'hidden' },
+            chip: { padding: '6px 12px', borderRadius: '20px', border: '1px solid #E3DAC9', background: 'white', fontSize: '12px' },
+            fab: { position: 'fixed', bottom: '30px', right: '30px', width: '56px', height: '56px', borderRadius: '50%', background: '#16324A', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.2)', cursor: 'pointer' },
+            modalOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 },
+            modal: { background: 'white', padding: '30px', borderRadius: '12px', width: '80%', maxWidth: '340px' },
+            input: { width: '100%', padding: '12px', marginBottom: '15px', boxSizing: 'border-box', border: '1px solid #ccc', borderRadius: '4px' },
+            saveBtn: { width: '100%', padding: '12px', background: '#16324A', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold' },
+            cancelBtn: { width: '100%', padding: '10px', background: 'none', border: 'none', marginTop: '10px', color: '#666' }
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<KimonoCloset />);
+        // 6. RENDER
+        ReactDOM.createRoot(document.getElementById('root')).render(<KimonoCloset />);
     </script>
 </body>
 </html>
